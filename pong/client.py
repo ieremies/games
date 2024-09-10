@@ -36,7 +36,7 @@ pygame.display.set_caption("Pong Multiplayer")
 
 # Connect to server
 client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-client.connect(("127.0.0.1", 5555))
+client.connect(("192.168.0.131", 5555))
 # receive side
 my_side = pickle.loads(client.recv(1024))["side"]
 print(my_side)
