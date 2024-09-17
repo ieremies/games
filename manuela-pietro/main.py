@@ -13,15 +13,14 @@ pygame.init()
 
 # Configurações da tela
 SCREEN_WIDTH = 900
-SCREEN_HEIGHT = 800
+SCREEN_HEIGHT = 500
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 pygame.display.set_caption("Manuela e Pietro")
-
 # Cores
-BLUE = (0, 0, 255)
-GREEN = (0, 255, 0)
-ORANGE = (255, 165, 0)
-PURPLE = (128, 0, 128)
+elite = (255, 165, 0)
+polie = (0, 255, 0)
+player = (255, 165, 0)
+oficina = (128, 0, 128)
 PINK = (255, 192, 203)
 RED = (255, 0, 0)
 
@@ -89,16 +88,22 @@ class Obstacle(Base):
     gravity = 0.15
 
     def __init__(self, x, color):
-        self.size = [30, 30]  # (largura, altura) do obstáculo
+        self.size = [50, 50]  # (largura, altura) do obstáculo
         self.pos = [x, -self.size[1]]  # (x, y) da posição do obstáculo
 
         # Carrega e redimensiona a imagem
-        self.image = pygame.surface.Surface(self.size)
-        self.image.fill(color)
-
+        if color == elite:
+            self.image = pygame.image.load("img/elite.png")
+            self.image = pygame.transform.scale(self.image, self.size)
+        if color == polie:    
+            self.image = pygame.image.load("img/polie.png")
+            self.image = pygame.transform.scale(self.image, self.size)
+        if color == oficina:
+            self.image = pygame.image.load("img/oficina.jpg")
+            self.image = pygame.transform.scale(self.image, self.size)
+        
         self.vel = [0, 5.0]
         self.color = color
-
     def move(self):
         self.pos[1] += self.vel[1]
         self.vel[1] += self.gravity
@@ -108,13 +113,14 @@ class Obstacle(Base):
         display.blit(self.image, self.pos)
 
 
-player = Player(ORANGE)
+player = Player(player)
 obstacles = []
 clock = pygame.time.Clock()
 last_obstacle = pygame.time.get_ticks()
-BLUSAS = [ORANGE, PURPLE, PINK]
+BLUSAS = [elite, oficina, polie]
 
 while True:
+    print("do balaco baco")
     screen.fill((135, 206, 235))  # fundo azul claro
     current_time = pygame.time.get_ticks()
 

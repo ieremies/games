@@ -14,25 +14,25 @@ pygame.init()
 
 # Configurações da tela
 SCREEN_WIDTH = 800
-SCREEN_HEIGHT = 600
+SCREEN_HEIGHT = 500
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 pygame.display.set_caption("Heitor Matheus e Samuel")
 
 
 class Fruit:
-    frequency = 1000  # New fruit every 1 second
-    gravity = 0.25
+    frequency = 5000  # New fruit every 1 second
+    gravity = 0.75
 
     def __init__(self):
         self.pos = [random.randint(0, SCREEN_WIDTH), 600.0]
-        self.size = [50.0, 50.0]
+        self.size = [200.0, 200.0]
 
         # Carrega e redimensiona a image
-        self.image = pygame.image.load("img/fruit.png").convert_alpha()
+        self.image = pygame.image.load("img/estojo.png").convert_alpha()
         self.image = pygame.transform.scale(self.image, self.size)
 
-        vel_x = (SCREEN_WIDTH / 2 - self.pos[0] + random.randint(-200, 200)) / 40
-        vel_y = random.uniform(-17.0, -13.0)
+        vel_x = (SCREEN_WIDTH / 2 - self.pos[0]     ) / 40
+        vel_y = random.uniform(-40, -32.0)
         self.vel = [vel_x, vel_y]
 
     def move(self):
@@ -61,7 +61,8 @@ clock = pygame.time.Clock()
 slash = Sound("snd/slash.mp3")
 
 while True:
-    screen.fill(WHITE)
+    background_image = pygame.image.load("img/Fundo1.png")
+    screen.blit(background_image, (0, 0))
 
     # Handle events
     for event in pygame.event.get():
