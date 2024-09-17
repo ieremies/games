@@ -73,7 +73,7 @@ def handle_paddle_movement(data):
 
 # Setup server
 server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-server.bind(("192.168.0.131", 5555))
+server.bind(("192.168.0.109", 5555))
 server.listen(2)
 print("Server started, waiting for connections...")
 
