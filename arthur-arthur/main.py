@@ -29,7 +29,7 @@ class Player(Base):
         self.change = [0, 0]
         self.vel = [5, 20]
 
-        self.image = pygame.image.load("img/player.png").convert_alpha()
+        self.image = pygame.image.load("img/Quadrado.png").convert_alpha()
         self.image = pygame.transform.scale(self.image, self.size)
 
         self.on_ground = True
@@ -184,3 +184,9 @@ while True:
 
     # Controlar a taxa de quadros
     clock.tick(60)
+
+    #Movimento contínuo para a direita (Ex: Geometry Dash)
+    #Ao cair, voltar ao inicio
+    #Link da imagem do personagem: https://www.reddit.com/r/notinteresting/comments/18kkvld/this_is_a_picture_of_the_geometry_dash_cube/?tl=pt-br&rdt=59585
+    #Link da imagem da moeda para substituir o troféu: https://www.pngegg.com/en/png-cbbwy
+    #Substituir o audio do cristiano ronaldo por uma coleta de moeda do tipo Super mario Bros
