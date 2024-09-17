@@ -11,7 +11,7 @@ pygame.init()
 SCREEN_WIDTH = 600
 SCREEN_HEIGHT = 800
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
-pygame.display.set_caption("Beatrice e Laura")
+pygame.display.set_caption("Melhor Jogo da Turma")
 
 
 # Classes
@@ -21,10 +21,10 @@ class Player(Base):
             SCREEN_WIDTH // 2,
             SCREEN_HEIGHT // 2,
         ]  # (x, y) da posição do jogador
-        self.size = [20, 20]  # (largura, altura) do jogador
+        self.size = [50, 80]  # (largura, altura) do jogador
 
         # Carrega e redimensiona a imagem
-        self.image = pygame.image.load("img/player.png").convert_alpha()
+        self.image = pygame.image.load("img/dir.webp").convert_alpha()
         self.image = pygame.transform.scale(self.image, self.size)
 
         self.vel = 5
@@ -52,8 +52,8 @@ class Students(Base):
         self.size = [10, 10]  # (largura, altura) do jogador
 
         # Carrega e redimensiona a imagem
-        self.image_right = pygame.Surface(self.size)
-        self.image_right.fill((0, 255, 0))
+        self.image_right = pygame.image.load("img/emoji.jpg").convert_alpha()
+        self.image_right = pygame.transform.scale(self.image_right, self.size)
 
         self.image_wrong = pygame.Surface(self.size)
         self.image_wrong.fill((255, 0, 0))

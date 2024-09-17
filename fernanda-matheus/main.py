@@ -53,16 +53,27 @@ class Player(Base):
 
 
 class Block(Base):
-    def __init__(self, x, y):
+    def __init__(self, x, y, vida):
         self.size = [40, 40]  # (largura, altura) do bloco
         self.pos = [x, y]  # (x, y) da posição do bloco
 
         # Carrega e redimensiona a imagem
-        self.image = pygame.image.load("img/book.png").convert_alpha()
-        self.image = pygame.transform.scale(self.image, self.size)
+        self.image1 = pygame.image.load("img/book1.png").convert_alpha()
+        self.image1 = pygame.transform.scale(self.image1, self.size)
+        self.image2 = pygame.image.load("img/book2.png").convert_alpha()
+        self.image2 = pygame.transform.scale(self.image2, self.size)
+        self.image3 = pygame.image.load("img/book3.png").convert_alpha()
+        self.image3 = pygame.transform.scale(self.image3, self.size)
+
+        self.vida = vida
 
     def update(self, display):
-        display.blit(self.image, self.pos)
+        if self.vida == 1:
+            display.blit(self.image1, self.pos)
+        if self.vida == 2:
+            display.blit(self.image2, self.pos)
+        if self.vida == 3:
+            display.blit(self.image3, self.pos)
 
 
 class Ball(Base):
@@ -131,13 +142,17 @@ class PowerUp(Base):
 balls = [Ball(300, 400)]
 player = Player(250, 750)
 power_ups = []
-blocks = [Block(x, y) for x in range(0, SCREEN_WIDTH, 40) for y in range(0, 200, 40)]
+blocks = [
+    Block(x, y, random.randint(1, 3))
+    for x in range(0, SCREEN_WIDTH, 40)
+    for y in range(0, 200, 40)
+]
 clock = pygame.time.Clock()
 power_up_sound = Sound("snd/power_up.mp3")
 block_break_sound = Sound("snd/block_break.mp3")
 
 while True:
-    screen.fill((0, 0, 0))
+    screen.fill((251, 251, 248))
 
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -167,10 +182,12 @@ while True:
         for block in blocks:
             c = ball.collides_with(block)
             if c:  # Se há colisão
-                blocks.remove(block)
-                block_break_sound.play()
-                if random.randint(0, 100) < 50:  # 50% chance de powerup
-                    power_ups.append(PowerUp(*block.pos))
+                block.vida = block.vida - 1
+                if block.vida == 0:
+                    blocks.remove(block)
+                    block_break_sound.play()
+                    if random.randint(0, 100) < 25:  # 50% chance de powerup
+                        power_ups.append(PowerUp(*block.pos))
             if c == "Vertical":
                 new_vel[0] = -ball.vel[0]
             if c == "Horizontal":
