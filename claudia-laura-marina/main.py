@@ -29,7 +29,7 @@ class Player(Base):
         self.size = [60, 60]  # (largura, altura) do jogador
 
         # Carrega e redimensiona a imagem
-        self.image = pygame.image.load("img/player.png").convert_alpha()
+        self.image = pygame.image.load("img/cachorro.png").convert_alpha()
         self.image = pygame.transform.scale(self.image, self.size)
 
         self.impulso = [0.0, 0.0]
@@ -80,7 +80,7 @@ class Platform(Base):
 
         # Carrega e redimensiona a imagem
         self.image = pygame.Surface((self.width, self.height))
-        self.image.fill((0, 255, 0))
+        self.image.fill((198, 239, 206))
 
     def move(self, scroll_offset):
         self.pos[1] += scroll_offset
@@ -103,9 +103,12 @@ platforms = [Platform(x=random.randint(1, 4) * 100, y=i * 100) for i in range(8)
 platforms.append(Platform(x=200, y=800))
 clock = pygame.time.Clock()
 jump = Sound("snd/jump.mp3")
+bg = pygame.image.load("img/fundoqaschelerfez.png").convert_alpha()
+y = -bg.get_height()+ SCREEN_HEIGHT
+
 
 while True:
-    screen.fill((135, 206, 235))  # fundo azul claro
+    screen.blit(bg,(0,y))
 
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -122,6 +125,7 @@ while True:
         # Mover todas as plataformas para baixo, simulando scroll
         for platform in platforms:
             platform.move(scroll_offset)
+        y = y + scroll_offset*0.1
 
         # Gerar novas plataformas
         generate_platforms(platforms[-1])
