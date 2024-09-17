@@ -1,8 +1,11 @@
 #!/usr/bin/env python3
 
+from time import clock_getres
 import pygame
 import random
 from utils.base import Base, Sound
+from utils.clock import Timer
+from utils.colors import RED, GREEN
 
 # Inicializa o Pygame
 pygame.init()
@@ -103,11 +106,42 @@ class Students(Base):
             display.blit(self.image_wrong, self.pos)
 
 
+def start_game():
+    global player, students, clock
+    player = Player()
+    students = [
+        Students(random.randint(0, SCREEN_WIDTH), random.randint(0, SCREEN_HEIGHT))
+        for _ in range(100)
+    ]
+    clock = Timer(time)
+
+
+def lose_screen():
+    text = font.render("Você não foi contratada", True, RED)
+    screen.blit(text, (SCREEN_WIDTH // 2 - 100, SCREEN_HEIGHT // 2 - 100))
+
+
+def win_screen():
+    text = font.render("Você foi contratada!", True, GREEN)
+    screen.blit(text, (SCREEN_WIDTH // 2 - 100, SCREEN_HEIGHT // 2 - 100))
+
+
+def check_students():
+    for student in students:
+        if not student.correct:
+            return False
+    return True
+
+
 player = Player()
 students = [
     Students(random.randint(0, SCREEN_WIDTH), random.randint(0, SCREEN_HEIGHT))
     for _ in range(100)
 ]
+time = 25
+clock = Timer(time)
+font = pygame.font.SysFont(None, 50)
+start_game()
 aaa = Sound("snd/fart.mp3")
 
 while True:
@@ -117,14 +151,23 @@ while True:
         if event.type == pygame.QUIT:
             pygame.quit()
             exit()
+        if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
+            start_game()
 
-    player.update(screen)
+    if clock.value <= 0:
+        lose_screen()
+    elif check_students():
+        win_screen()
+    else:
+        player.update(screen)
 
-    for student in students:
-        student.update(screen, player)
+        for student in students:
+            student.update(screen, player)
 
-        if student.collides_with(player):
-            student.change_uniform()
+            if student.collides_with(player):
+                student.change_uniform()
+
+        clock.draw(screen)
 
     pygame.display.flip()
     pygame.time.Clock().tick(60)

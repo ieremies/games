@@ -1,8 +1,7 @@
 #!/usr/bin/env python3
 
-import pygame
 import time
-from element import Element
+from utils.element import Element
 
 
 class Stopwatch(Element):
