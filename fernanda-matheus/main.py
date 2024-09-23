@@ -17,9 +17,9 @@ pygame.init()
 
 # Configurações da tela
 SCREEN_WIDTH = 600
-SCREEN_HEIGHT = 800
+SCREEN_HEIGHT = 600
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
-pygame.display.set_caption("Beatrice e Laura")
+pygame.display.set_caption("Moriyyaa")
 
 
 # Classes
@@ -54,7 +54,7 @@ class Player(Base):
 
 class Block(Base):
     def __init__(self, x, y, vida):
-        self.size = [40, 40]  # (largura, altura) do bloco
+        self.size = [40, 25]  # (largura, altura) do bloco
         self.pos = [x, y]  # (x, y) da posição do bloco
 
         # Carrega e redimensiona a imagem
@@ -140,19 +140,23 @@ class PowerUp(Base):
 
 
 balls = [Ball(300, 400)]
-player = Player(250, 750)
+player = Player(250, 550)
 power_ups = []
 blocks = [
     Block(x, y, random.randint(1, 3))
     for x in range(0, SCREEN_WIDTH, 40)
-    for y in range(0, 200, 40)
+    for y in range(0, 200, 20)
 ]
 clock = pygame.time.Clock()
 power_up_sound = Sound("snd/power_up.mp3")
 block_break_sound = Sound("snd/block_break.mp3")
 
+image = pygame.image.load("img/image.webp").convert_alpha()
+image = pygame.transform.scale(image, (SCREEN_WIDTH-100,SCREEN_HEIGHT-320))
+
 while True:
     screen.fill((251, 251, 248))
+    screen.blit(image,(50,270))
 
     for event in pygame.event.get():
         if event.type == pygame.QUIT:

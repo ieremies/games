@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 
-from time import clock_getres
 import pygame
 import random
 from utils.base import Base, Sound
@@ -52,10 +51,10 @@ class Player(Base):
 class Students(Base):
     def __init__(self, x, y):
         self.pos = [x, y]  # (x, y) da posição do aluno
-        self.size = [10, 10]  # (largura, altura) do jogador
+        self.size = [40, 40]  # (largura, altura) do jogador
 
         # Carrega e redimensiona a imagem
-        self.image_right = pygame.image.load("img/emoji.jpg").convert_alpha()
+        self.image_right = pygame.image.load("img/bonecoideal.png").convert_alpha()
         self.image_right = pygame.transform.scale(self.image_right, self.size)
 
         self.image_wrong = pygame.Surface(self.size)
@@ -156,7 +155,8 @@ while True:
 
     if clock.value <= 0:
         lose_screen()
-    elif check_students():
+    
+    if check_students():
         win_screen()
     else:
         player.update(screen)

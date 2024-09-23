@@ -2,7 +2,6 @@
 import pygame
 import random
 from utils.base import Base, Sound
-from utils.life import Lifebar
 
 # Inicializa o Pygame
 pygame.init()
@@ -11,7 +10,7 @@ pygame.init()
 SCREEN_WIDTH = 600
 SCREEN_HEIGHT = 800
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
-pygame.display.set_caption("Beatrice e Laura")
+pygame.display.set_caption("Beatrice e Luisa")
 
 
 # Classes
@@ -92,9 +91,7 @@ obstacles: list[Obstacle] = []
 bullets: list[Bullet] = []
 clock = pygame.time.Clock()
 player = Player()
-life = Lifebar(10)
 explosion = Sound("snd/explosion.wav")
-invulnerabilidade = 0
 
 while True:
     screen.fill((0, 100, 0))  # Fundo verde
@@ -130,13 +127,8 @@ while True:
     obstacles = [obstacle for obstacle in obstacles if obstacle.pos[1] < SCREEN_HEIGHT]
 
     # Verificar colisões jogador-obstáculo
-    invulnerabilidade -= 1
     for obstacle in obstacles:  # para cada obstáculo
         if player.collides_with(obstacle):  # se colidiu
-            if invulnerabilidade > 0:
-                continue
-            life.value -= 1
-            invulnerabilidade = 90  # 1.5s
             if obstacle.type == "chair":
                 print("Colidiu com uma cadeira!")
             elif obstacle.type == "test":
@@ -154,8 +146,6 @@ while True:
 
     # Atualiza o jogador
     player.update(screen, FAIXAS)
-
-    life.draw(screen)
 
     # Atualiza a tela
     pygame.display.flip()

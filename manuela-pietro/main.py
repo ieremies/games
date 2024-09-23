@@ -96,7 +96,7 @@ class Obstacle(Base):
             self.image = pygame.image.load("img/elite.png")
             self.image = pygame.transform.scale(self.image, self.size)
         if color == polie:    
-            self.image = pygame.image.load("img/polie.png")
+            self.image = pygame.image.load("img/poliedro.jpg")
             self.image = pygame.transform.scale(self.image, self.size)
         if color == oficina:
             self.image = pygame.image.load("img/oficina.jpg")
@@ -118,11 +118,15 @@ obstacles = []
 clock = pygame.time.Clock()
 last_obstacle = pygame.time.get_ticks()
 BLUSAS = [elite, oficina, polie]
+image = pygame.image.load("img/enem.jpg").convert_alpha()
+image = pygame.transform.scale(image, (SCREEN_WIDTH, SCREEN_HEIGHT))
 
 while True:
     print("do balaco baco")
     screen.fill((135, 206, 235))  # fundo azul claro
+    screen.blit(image, (0,0))
     current_time = pygame.time.get_ticks()
+
 
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -132,9 +136,16 @@ while True:
     player.update(screen)
 
     if current_time - last_obstacle > Obstacle.frequency:
+        Obstacle.frequency -= 10
         obstacles.append(
             Obstacle(random.randint(0, SCREEN_WIDTH - 60), random.choice(BLUSAS))
         )
+        for i in range(3):
+            obstacles.append(
+            Obstacle(random.randint(0, SCREEN_WIDTH - 60), random.choice(BLUSAS))
+        )
+            Obstacle.frequency += 100
+
         last_obstacle = current_time
         Obstacle.frequency = random.randint(500, 1500)
 

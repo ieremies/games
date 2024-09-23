@@ -7,8 +7,8 @@ from utils.base import Base, Sound
 pygame.init()
 
 # Configurações da tela
-SCREEN_WIDTH = 900
-SCREEN_HEIGHT = 800
+SCREEN_WIDTH = 1366
+SCREEN_HEIGHT = 768
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 pygame.display.set_caption("Matheus^2 e Stephanie")
 
@@ -19,10 +19,10 @@ class Player(Base):
 
     def __init__(self):
         self.pos = [100.0, 400.0]  # (x, y) da posição do jogador
-        self.size = [60, 60]  # (largura, altura) do jogador
+        self.size = [85, 85]  # (largura, altura) do jogador
 
         # Carrega e redimensiona a imagem
-        self.image = pygame.image.load("img/player.png").convert_alpha()
+        self.image = pygame.image.load("img/elitecol.png").convert_alpha()
         self.image = pygame.transform.scale(self.image, self.size)
 
         self.impulso = 0
@@ -53,11 +53,11 @@ class Obstacle(Base):
     frequency = 1500  # Novo obstáculo a cada 1.5 segundos
 
     def __init__(self, y):
-        self.size = [30, 30]  # (largura, altura) do obstáculo
+        self.size = [80, 80]  # (largura, altura) do obstáculo
         self.pos = [SCREEN_WIDTH, y]  # (x, y) da posição do obstáculo
 
         # Carrega e redimensiona a imagem
-        self.image = pygame.image.load("img/bird.png").convert_alpha()
+        self.image = pygame.image.load("img/prova a+.jfif").convert_alpha()
         self.image = pygame.transform.scale(self.image, self.size)
 
         self.vel = [-5, 0]
@@ -72,13 +72,13 @@ class Obstacle(Base):
 
 class Bullet(Base):
     def __init__(self, x, y):
-        self.size = [30, 30]  # (largura, altura) do tiro
+        self.size = [100, 100]  # (largura, altura) do tiro
         self.pos = [
             x - self.size[0] // 2,
             y - self.size[1] // 2,
         ]  # (x, y) da posição do tiro centrado no jogador
 
-        self.image = pygame.image.load("img/bullet.png").convert_alpha()
+        self.image = pygame.image.load("img/caneta.png").convert_alpha()
         self.image = pygame.transform.scale(self.image, self.size)
 
         self.vel = (15, 0)
@@ -96,11 +96,15 @@ last_obstacle = pygame.time.get_ticks()
 obstacles: list[Obstacle] = []
 bullets: list[Bullet] = []
 clock = pygame.time.Clock()
-explosion = Sound("snd/explosion.wav")
+explosion = Sound("snd/verde.mp3")
 cooldown = 0
 
+bg = pygame.image.load("img/patioelite.jpg").convert_alpha()
+bg= pygame.transform.scale(bg, (SCREEN_WIDTH, SCREEN_HEIGHT))
+
+
 while True:
-    screen.fill((0, 100, 255))
+    screen.blit(bg, (0,0))
     current_time = pygame.time.get_ticks()
 
     # Término do jogo
@@ -125,7 +129,7 @@ while True:
     if current_time - last_obstacle > Obstacle.frequency:
         obstacles.append(Obstacle(random.randint(0, SCREEN_HEIGHT - 60)))
         last_obstacle = current_time
-        Obstacle.frequency -= 10  # Aumenta a frequência de obstáculos
+        Obstacle.frequency# Aumenta a frequência de obstáculos
 
     # Atualizar posição dos obstáculos
     for obstacle in obstacles:

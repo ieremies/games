@@ -139,6 +139,15 @@ def generate_platforms(last_platform):
 
 
 # Inicialização
+
+
+def reset():
+    global player, platforms, trophies
+    player = Player()
+    platforms = [Platform(800, 40, 0, SCREEN_HEIGHT - 40)]
+    trophies = []
+
+
 player = Player()
 platforms = [Platform(800, 40, 0, SCREEN_HEIGHT - 40)]
 trophies = []
@@ -146,7 +155,7 @@ clock = pygame.time.Clock()
 siuuu = Sound("snd/siuuu.mp3")
 
 while True:
-    screen.fill((135, 206, 235))  # fundo azul claro
+    screen.fill((0,0,156))  # fundo azul claro
 
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -178,6 +187,9 @@ while True:
         if player.collides_with(trophy):
             siuuu.play()
             trophies.remove(trophy)
+
+    if player.y > SCREEN_HEIGHT + 100:
+        reset()
 
     # Atualizar a tela
     pygame.display.flip()

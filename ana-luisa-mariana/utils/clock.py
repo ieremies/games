@@ -4,6 +4,7 @@ import time
 from utils.element import Element
 
 
+
 class Stopwatch(Element):
     """
     Classe para criar um relógio.
