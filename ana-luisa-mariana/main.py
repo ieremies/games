@@ -5,6 +5,7 @@ import random
 from utils.base import Base, Sound
 from utils.clock import Timer
 from utils.colors import RED, GREEN
+from images import load_images_from_folder, combine_npc_images
 
 # Inicializa o Pygame
 pygame.init()
@@ -14,6 +15,10 @@ SCREEN_WIDTH = 600
 SCREEN_HEIGHT = 800
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 pygame.display.set_caption("Melhor Jogo da Turma")
+
+heads = load_images_from_folder("img/heads")
+body_correct = pygame.image.load("img/body_correct.png").convert_alpha()
+body_wrong = pygame.image.load("img/body_wrong.png").convert_alpha()
 
 
 # Classes
@@ -54,11 +59,12 @@ class Students(Base):
         self.size = [40, 40]  # (largura, altura) do jogador
 
         # Carrega e redimensiona a imagem
-        self.image_right = pygame.image.load("img/bonecoideal.png").convert_alpha()
+        head = random.choice(heads)
+        self.image_right = combine_npc_images(head, body_correct)
         self.image_right = pygame.transform.scale(self.image_right, self.size)
 
-        self.image_wrong = pygame.Surface(self.size)
-        self.image_wrong.fill((255, 0, 0))
+        self.image_wrong = combine_npc_images(head, body_wrong)
+        self.image_wrong = pygame.transform.scale(self.image_wrong, self.size)
 
         self.correct = random.choice([True, False])
 
@@ -155,7 +161,7 @@ while True:
 
     if clock.value <= 0:
         lose_screen()
-    
+
     if check_students():
         win_screen()
     else:

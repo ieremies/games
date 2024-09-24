@@ -26,7 +26,7 @@ class Player(Base):
     def __init__(self):
         self.pos = [50, SCREEN_HEIGHT - 50]
         self.size = [50, 50]
-        self.change = [0, 0]
+        self.change = [5, 0]
         self.vel = [5, 20]
 
         self.image = pygame.image.load("img/Quadrado.png").convert_alpha()
@@ -37,29 +37,30 @@ class Player(Base):
     def move(self):
         keys = pygame.key.get_pressed()
 
-        if keys[pygame.K_LEFT]:
-            self.change[0] -= self.vel[0]
-        if keys[pygame.K_RIGHT]:
-            self.change[0] += self.vel[0]
+        # if keys[pygame.K_LEFT]:
+        #     self.change[0] -= self.vel[0]
+        # if keys[pygame.K_RIGHT]:
+        #     self.change[0] += self.vel[0]
         if keys[pygame.K_SPACE] and self.on_ground:
             self.change[1] -= self.vel[1]
             self.on_ground = False
 
     def update(self, display, platforms):
         self.move()  # processar movimento
+        print(self.change)
         self.change[1] += self.gravity  # aplicar gravidade
 
         # Movimentar o jogador na horizontal
         self.x += self.change[0]
 
-        # Checar colisões horizontais
-        for platform in platforms:  # para cada plataforma
-            if self.collides_with(platform):  # se colidir com a plataforma
-                if self.change[0] > 0:  # e estou indo para a direita
-                    self.x = platform.rect.left - self.width
-                elif self.change[0] < 0:  # e estou indo para a esquerda
-                    self.x = platform.rect.right
-                self.change[0] = 0
+        # # Checar colisões horizontais
+        # for platform in platforms:  # para cada plataforma
+        #     if self.collides_with(platform):  # se colidir com a plataforma
+        #         if self.change[0] > 0:  # e estou indo para a direita
+        #             self.x = platform.rect.left - self.width
+        #         elif self.change[0] < 0:  # e estou indo para a esquerda
+        #             self.x = platform.rect.right
+        #         self.change[0] = 0
 
         # Movimentar verticalmente
         self.y += self.change[1]
@@ -78,7 +79,7 @@ class Player(Base):
         if self.pos[0] < 0:
             self.pos[0] = 0
 
-        self.change[0] = 0
+        self.change[0] = 5
 
         display.blit(self.image, self.pos)
 
@@ -155,7 +156,7 @@ clock = pygame.time.Clock()
 siuuu = Sound("snd/siuuu.mp3")
 
 while True:
-    screen.fill((0,0,156))  # fundo azul claro
+    screen.fill((0, 0, 156))  # fundo azul claro
 
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -197,8 +198,8 @@ while True:
     # Controlar a taxa de quadros
     clock.tick(60)
 
-    #Movimento contínuo para a direita (Ex: Geometry Dash)
-    #Ao cair, voltar ao inicio
-    #Link da imagem do personagem: https://www.reddit.com/r/notinteresting/comments/18kkvld/this_is_a_picture_of_the_geometry_dash_cube/?tl=pt-br&rdt=59585
-    #Link da imagem da moeda para substituir o troféu: https://www.pngegg.com/en/png-cbbwy
-    #Substituir o audio do cristiano ronaldo por uma coleta de moeda do tipo Super mario Bros
+    # Movimento contínuo para a direita (Ex: Geometry Dash)
+    # Ao cair, voltar ao inicio
+    # Link da imagem do personagem: https://www.reddit.com/r/notinteresting/comments/18kkvld/this_is_a_picture_of_the_geometry_dash_cube/?tl=pt-br&rdt=59585
+    # Link da imagem da moeda para substituir o troféu: https://www.pngegg.com/en/png-cbbwy
+    # Substituir o audio do cristiano ronaldo por uma coleta de moeda do tipo Super mario Bros
