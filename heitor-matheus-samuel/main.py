@@ -9,6 +9,9 @@ import random
 import time
 from collections import deque
 from utils.base import Sound
+from utils.clock import Timer
+from utils.life import Lifebar
+from utils.score import Score
 
 # Inicializa o Pygame
 pygame.init()
@@ -34,6 +37,7 @@ initial_frequency = 1000  # 1 segundo
 frequency_decrement = 10  # A quantidade de redução na frequência por minuto jogado
 min_frequency = 500  # Frequência mínima (0.5 segundos)
 
+
 # Função para alterar a cor da imagem
 def change_color(image, color):
     colored_image = pygame.Surface(image.get_size(), pygame.SRCALPHA)
@@ -41,19 +45,26 @@ def change_color(image, color):
     colored_image.fill(color, special_flags=pygame.BLEND_MULT)
     return colored_image
 
+
 # Função para verificar colisão entre duas áreas
 def check_collision(pos1, size1, pos2, size2):
-    return (pos1[0] < pos2[0] + size2[0] and
-            pos1[0] + size1[0] > pos2[0] and
-            pos1[1] < pos2[1] + size2[1] and
-            pos1[1] + size1[1] > pos2[1])
+    return (
+        pos1[0] < pos2[0] + size2[0]
+        and pos1[0] + size1[0] > pos2[0]
+        and pos1[1] < pos2[1] + size2[1]
+        and pos1[1] + size1[1] > pos2[1]
+    )
+
 
 # Classe Fruit
 class Fruit:
     gravity = 0.25
 
     def __init__(self, image_name):
-        self.pos = [random.randint(0, SCREEN_WIDTH - 200), 600.0]  # Ajusta a posição para evitar que saiam da tela
+        self.pos = [
+            random.randint(0, SCREEN_WIDTH - 200),
+            600.0,
+        ]  # Ajusta a posição para evitar que saiam da tela
         self.size = [170.0, 170.0]
 
         # Carrega e redimensiona a imagem de acordo com o parâmetro `image_name`
@@ -67,7 +78,9 @@ class Fruit:
 
         # Divide a imagem em duas metades
         self.left_half = self.image.subsurface((0, 0, self.size[0] // 2, self.size[1]))
-        self.right_half = self.image.subsurface((self.size[0] // 2, 0, self.size[0] // 2, self.size[1]))
+        self.right_half = self.image.subsurface(
+            (self.size[0] // 2, 0, self.size[0] // 2, self.size[1])
+        )
 
         self.is_cut = False  # Indica se a fruta foi cortada
         self.split_offset = 50  # Distância entre as duas metades após o corte
@@ -95,16 +108,20 @@ class Fruit:
         else:
             # Desenha as duas metades da fruta cortada
             display.blit(self.left_half, (self.pos[0] - self.split_offset, self.pos[1]))
-            display.blit(self.right_half, (self.pos[0] + self.split_offset, self.pos[1]))
+            display.blit(
+                self.right_half, (self.pos[0] + self.split_offset, self.pos[1])
+            )
 
     def cut(self):
         # Define que a fruta foi cortada
         self.is_cut = True
         self.vel = [self.vel[0], self.vel[1] + 1]  # Ajusta a velocidade após o corte
 
+
 # Variáveis para o sistema de vidas
 lives = 3  # Quantidade inicial de vidas
 font = pygame.font.SysFont(None, 55)  # Fonte para exibir o Game Over
+
 
 # Função para exibir texto na tela
 def draw_text(text, font, color, surface, x, y):
@@ -112,6 +129,7 @@ def draw_text(text, font, color, surface, x, y):
     textrect = textobj.get_rect()
     textrect.center = (x, y)
     surface.blit(textobj, textrect)
+
 
 # Variables for slash detection
 mouse_positions = deque(maxlen=10)  # Track last 10 mouse positions
@@ -128,8 +146,12 @@ start_time = time.time()
 game_over = False
 running = True
 
+timer = Timer(20)
+life = Lifebar(start_value=3, max_value=3, icon=None)
+score = Score(icon=None)
+
 ruler = pygame.image.load(f"img/regua.png").convert_alpha()
-ruler = pygame.transform.scale(ruler, (40,40))
+ruler = pygame.transform.scale(ruler, (40, 40))
 
 while running:
     screen.blit(background, (0, 0))  # Desenha a imagem de fundo (sala de aula)
@@ -138,12 +160,28 @@ while running:
         if event.type == pygame.QUIT:
             running = False
 
-    if lives <= 0:
+    if lives <= 0 or timer.value <= 0:
         # Exibe tela de Game Over
         elapsed_time = elapsed_time
-        draw_text('Game Over', font, RED, screen, SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 - 50)
-        draw_text(f'Thanks for playing', font, RED, screen, SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 + 50)
-        draw_text(f'Time played: {elapsed_time // 60}:{elapsed_time % 60:02d}', font, RED, screen, SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 + 150)
+        draw_text(
+            "Game Over", font, RED, screen, SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 - 50
+        )
+        draw_text(
+            f"Thanks for playing",
+            font,
+            RED,
+            screen,
+            SCREEN_WIDTH // 2,
+            SCREEN_HEIGHT // 2 + 50,
+        )
+        draw_text(
+            f"Time played: {elapsed_time // 60}:{elapsed_time % 60:02d}",
+            font,
+            RED,
+            screen,
+            SCREEN_WIDTH // 2,
+            SCREEN_HEIGHT // 2 + 150,
+        )
         pygame.display.flip()
         continue  # Pausa o jogo
 
@@ -152,33 +190,41 @@ while running:
 
     # Atualiza e desenha frutas
     current_time = pygame.time.get_ticks()
-    if current_time - last_fruit_time > initial_frequency:
+    if current_time - last_fruit_time > initial_frequency and timer.value > 0:
         for _ in range(random.randint(1, 3)):
             # Escolhe aleatoriamente entre "Nota Boa", "Nota Ruim" e "Estojo"
             image_name = random.choices(
-                ["Nota Ruim", "Nota Boa", "Estojo"],
-                weights=[0.75, 0.15, 0.5],
-                k=1
+                ["Nota Ruim", "Nota Boa", "Estojo"], weights=[0.75, 0.15, 0.5], k=1
             )[0]
             frutas.append(Fruit(image_name))
         last_fruit_time = current_time
         # Reduz a frequência das frutas com o tempo
-        frequency = max(min_frequency, initial_frequency - (elapsed_time // 60 * frequency_decrement))  # Frequência mínima
+        frequency = max(
+            min_frequency,
+            initial_frequency - (elapsed_time // 60 * frequency_decrement),
+        )  # Frequência mínima
         initial_frequency = frequency
 
     for fruta in frutas:
         fruta.update(screen)
 
     # Exibe o número de vidas e o tempo de jogo na tela
-    draw_text(f'Vidas: {lives}', font, RED, screen, 100, 50)
-    draw_text(f'Time: {elapsed_time // 60}:{elapsed_time % 60:02d}', font, RED, screen, SCREEN_WIDTH - 100, 50)
+    draw_text(f"Vidas: {lives}", font, RED, screen, 100, 50)
+    draw_text(
+        f"Time: {elapsed_time // 60}:{elapsed_time % 60:02d}",
+        font,
+        RED,
+        screen,
+        SCREEN_WIDTH - 100,
+        50,
+    )
 
     # Get mouse position and add to deque
     mouse_positions.append(pygame.mouse.get_pos())
 
-    x = mouse_positions[-1][0] -20
-    y = mouse_positions[-1][1] -20
-    screen.blit(ruler, (x,y))
+    x = mouse_positions[-1][0] - 20
+    y = mouse_positions[-1][1] - 20
+    screen.blit(ruler, (x, y))
 
     # Draw mouse trail
     for i in range(1, len(mouse_positions)):
@@ -211,15 +257,28 @@ while running:
 
                     # Verifica se a fruta cortada é "Nota Boa"
                     if fruta.image_name == "Nota Boa":
+                        life.value -= 1
                         lives -= 1  # Perde uma vida se for Nota Boa
                         print(f"Lives remaining: {lives}")
+                    else:
+                        score.value += 1
 
                     fruta.cut()  # Corta a fruta
 
     # Exibe o número de vidas na tela
-    draw_text(f'Vidas: {lives}', font, RED, screen, 100, 50)
-    draw_text(f'Time: {elapsed_time // 60}:{elapsed_time % 60:02d}', font, RED, screen, SCREEN_WIDTH - 100, 50)
+    draw_text(f"Vidas: {lives}", font, RED, screen, 100, 50)
+    draw_text(
+        f"Time: {elapsed_time // 60}:{elapsed_time % 60:02d}",
+        font,
+        RED,
+        screen,
+        SCREEN_WIDTH - 100,
+        50,
+    )
 
+    timer.draw(screen)
+    life.draw(screen)
+    score.draw(screen)
     # Update display
     pygame.display.flip()
 

@@ -27,7 +27,7 @@ def load_images_from_folder(folder_path):
     """Helper function to load all images from a folder."""
     images = []
     for filename in os.listdir(folder_path):
-        if filename.endswith(".png"):  # Adjust if you use other formats
+        if filename.endswith(".png") or filename.endswith(".jpg"):  # Adjust if you use other formats
             img_path = os.path.join(folder_path, filename)
             img = pygame.image.load(img_path).convert_alpha()
             images.append(img)

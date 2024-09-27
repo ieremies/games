@@ -3,6 +3,10 @@ import pygame
 import random
 import os
 
+from utils.life import Lifebar
+from utils.sound import Sound
+from utils.score import Score
+
 # Initialize Pygame
 pygame.init()
 screen = pygame.display.set_mode((750, 480))
@@ -72,9 +76,13 @@ def calculate_score(hand):
 
 # Game initialization
 def start_game():
-    global deck
+    global deck, game_over, player_turn, dealer_turn, player_hand, dealer_hand, life_taken
     deck = deck.copy()
     random.shuffle(deck)
+    game_over = False
+    player_turn = True
+    dealer_turn = False
+    life_taken = False
     player_hand = [draw_card(deck), draw_card(deck)]
     dealer_hand = [draw_card(deck), draw_card(deck)]
     return deck, player_hand, dealer_hand
@@ -97,13 +105,56 @@ def display_hand(screen, hand, pos, label):
             x_offset += 90  # Adjust spacing between cards
 
 
+def win():
+    pygame.mixer.music.stop()
+    win_snd = Sound("snd/win.wav")
+    win_snd.play()
+    # Write "Você venceu, sua alma foi salva."
+    font = pygame.font.Font(None, 36)
+    text = font.render("Você venceu, sua alma foi salva.", True, (255, 255, 255))
+    screen.blit(text, (50, 350))
+
+
+def lose():
+    pygame.mixer.music.stop()
+    lose_snd = Sound("snd/lose.wav")
+    lose_snd.play()
+    # Write "Você perdeu, sua alma foi condenada."
+    font = pygame.font.Font(None, 36)
+    text = font.render("Você perdeu, sua alma foi condenada.", True, (255, 255, 255))
+    screen.blit(text, (50, 350))
+
+
+def controls():
+    # Write the controls on the screen:
+    font = pygame.font.Font(None, 26)
+    text = font.render("Pressione H para pedir carta", True, (255, 255, 255))
+    screen.blit(text, (50, 390))
+    text = font.render("Pressione S para parar", True, (255, 255, 255))
+    screen.blit(text, (50, 420))
+    text = font.render("Pressione R para próxima mão", True, (255, 255, 255))
+    screen.blit(text, (50, 450))
+
+
 # Main game loop
 deck, player_hand, dealer_hand = start_game()
 game_over = False
 player_turn = True
 dealer_turn = False
+life_taken = False
 font = pygame.font.SysFont(None, 36)
+life = Lifebar(start_value=3, max_value=7, icon=None)
+pygame.mixer.init()
+pygame.mixer.music.load("snd/music.mp3")
+pygame.mixer.music.play()
+pygame.mixer.music.set_volume(0.5)
 
+story = []
+for i in range(1, 7):
+    story.append(pygame.image.load(f"img/story{i}.jpg"))
+    story[i - 1] = pygame.transform.scale(story[i - 1], (750, 480))
+
+i = 1
 while True:
     screen.fill((0, 128, 0))
 
@@ -128,6 +179,26 @@ while True:
                 game_over = False
                 player_turn = True
                 dealer_turn = False
+
+    if i < 7:
+        screen.blit(story[i - 1], (0, 0))
+        pygame.display.flip()
+        pygame.time.wait(1000)
+        i += 1
+        continue
+
+    if life.value >= 7:
+        win()
+        pygame.display.flip()
+        pygame.time.wait(3000)
+        pygame.quit()
+        exit()
+    if life.value <= 0:
+        lose()
+        pygame.display.flip()
+        pygame.time.wait(3000)
+        pygame.quit()
+        exit()
 
     # Dealer logic
     if dealer_turn and not game_over:
@@ -159,17 +230,33 @@ while True:
         # Determine winner
         if player_score > 21:
             result = "Player busts! Dealer wins."
+            if not life_taken:
+                life.value -= 1
+                life_taken = True
         elif dealer_score > 21:
             result = "Dealer busts! Player wins."
+            if not life_taken:
+                life.value += 1
+                life_taken = True
         elif player_score > dealer_score:
             result = "Player wins!"
+            if not life_taken:
+                life.value += 1
+                life_taken = True
         elif dealer_score > player_score:
             result = "Dealer wins!"
+            if not life_taken:
+                life.value -= 1
+                life_taken = True
         else:
             result = "It's a tie!"
 
         result_text = font.render(result, True, (255, 255, 255))
         screen.blit(result_text, (50, 350))
+
+    life.draw(screen)
+
+    controls()
 
     pygame.display.flip()
     clock.tick(30)

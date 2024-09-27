@@ -18,7 +18,7 @@ screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 pygame.display.set_caption("Claudia, Laura e Marina")
 
 #carregar imagem dos personagens
-personagem1_img = pygame.image.load("img/cachorro.png")
+personagem1_img = pygame.image.load("img/caramelu.png")
 #personagem2_img = pygame.image.load()
 
 # Classes
@@ -32,7 +32,7 @@ class Player(Base):
         self.size = [60, 60]  # (largura, altura) do jogador
 
         # Carrega e redimensiona a imagem
-        self.image = pygame.image.load("img/cachorro.png").convert_alpha()
+        self.image = pygame.image.load("img/caramelu.png").convert_alpha()
         self.image = pygame.transform.scale(self.image, self.size)
 
         self.impulso = [0.0, 0.0]

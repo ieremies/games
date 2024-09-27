@@ -4,21 +4,21 @@ import pygame
 import random
 from utils.base import Base, Sound
 from utils.clock import Timer
-from utils.colors import RED, GREEN
+from utils.colors import RED, GREEN, BLACK
 from images import load_images_from_folder, combine_npc_images
 
 # Inicializa o Pygame
 pygame.init()
 
 # Configurações da tela
-SCREEN_WIDTH = 600
-SCREEN_HEIGHT = 800
+SCREEN_WIDTH = 800
+SCREEN_HEIGHT = 600
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 pygame.display.set_caption("Melhor Jogo da Turma")
 
 heads = load_images_from_folder("img/heads")
-body_correct = pygame.image.load("img/body_correct.png").convert_alpha()
-body_wrong = pygame.image.load("img/body_wrong.png").convert_alpha()
+body_correct = pygame.image.load("img/bonecolucio.png").convert_alpha()
+body_wrong = pygame.image.load("img/mariaerrada.png").convert_alpha()
 
 
 # Classes
@@ -56,10 +56,12 @@ class Player(Base):
 class Students(Base):
     def __init__(self, x, y):
         self.pos = [x, y]  # (x, y) da posição do aluno
-        self.size = [40, 40]  # (largura, altura) do jogador
+        self.size = [60, 60]  # (largura, altura) do jogador
 
         # Carrega e redimensiona a imagem
         head = random.choice(heads)
+        head = pygame.transform.scale(head, (150, 200))
+
         self.image_right = combine_npc_images(head, body_correct)
         self.image_right = pygame.transform.scale(self.image_right, self.size)
 
@@ -116,19 +118,32 @@ def start_game():
     player = Player()
     students = [
         Students(random.randint(0, SCREEN_WIDTH), random.randint(0, SCREEN_HEIGHT))
-        for _ in range(100)
+        for _ in range(75)
     ]
     clock = Timer(time)
 
 
+lose_img = pygame.image.load("img/PERDEU.jpg")
+lose_img = pygame.transform.scale(lose_img, (SCREEN_WIDTH, SCREEN_HEIGHT))
+
+
 def lose_screen():
-    text = font.render("Você não foi contratada", True, RED)
-    screen.blit(text, (SCREEN_WIDTH // 2 - 100, SCREEN_HEIGHT // 2 - 100))
+    # Show image "img/PERDEU.jpg"
+    screen.blit(lose_img, (0, 0))
 
 
-def win_screen():
-    text = font.render("Você foi contratada!", True, GREEN)
-    screen.blit(text, (SCREEN_WIDTH // 2 - 100, SCREEN_HEIGHT // 2 - 100))
+win_img = pygame.image.load("img/VENCEU.jpg")
+win_img = pygame.transform.scale(win_img, (SCREEN_WIDTH, SCREEN_HEIGHT))
+
+
+def win_screen(time):
+    # Show image "img/VENCEU.jpg"
+    screen.blit(win_img, (0, 0))
+
+    # Show on the screen the time that the player took to win
+    font = pygame.font.Font(None, 36)
+    text = font.render(f"Tempo: {time}", True, BLACK)
+    screen.blit(text, (SCREEN_WIDTH // 2 - 100, SCREEN_HEIGHT - 100))
 
 
 def check_students():
@@ -141,16 +156,18 @@ def check_students():
 player = Player()
 students = [
     Students(random.randint(0, SCREEN_WIDTH), random.randint(0, SCREEN_HEIGHT))
-    for _ in range(100)
+    for _ in range(50)
 ]
 time = 25
 clock = Timer(time)
-font = pygame.font.SysFont(None, 50)
 start_game()
 aaa = Sound("snd/fart.mp3")
+background = pygame.image.load("img/FUNDO.jpg")
+background = pygame.transform.scale(background, (SCREEN_WIDTH, SCREEN_HEIGHT))
 
 while True:
-    screen.fill((255, 255, 255))
+    # screen.fill((255, 255, 255))
+    screen.blit(background, (0, 0))
 
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -159,11 +176,10 @@ while True:
         if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
             start_game()
 
-    if clock.value <= 0:
-        lose_screen()
-
     if check_students():
-        win_screen()
+        win_screen(clock.value)
+    elif clock.value <= 0:
+        lose_screen()
     else:
         player.update(screen)
 

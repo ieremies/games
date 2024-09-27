@@ -2,6 +2,7 @@
 import pygame
 import random
 from utils.base import Base, Sound
+from utils.score import Score
 
 # Inicializar o Pygame
 pygame.init()
@@ -47,7 +48,6 @@ class Player(Base):
 
     def update(self, display, platforms):
         self.move()  # processar movimento
-        print(self.change)
         self.change[1] += self.gravity  # aplicar gravidade
 
         # Movimentar o jogador na horizontal
@@ -105,7 +105,7 @@ class Trophy(Base):
         self.pos = [x, y]
         self.size = [width, height]
 
-        self.image = pygame.image.load("img/trophy.jpg").convert_alpha()
+        self.image = pygame.image.load("img/coin.png").convert_alpha()
         self.image = pygame.transform.scale(self.image, self.size)
 
     def move(self, scroll_offset):
@@ -129,7 +129,6 @@ def generate_platforms(last_platform):
     prop = min(last_platform.y / SCREEN_HEIGHT, 1)
     down = round(last_platform.y + 100 * (1 - prop))
     up = round(last_platform.y - 100 * prop)
-    print(up, down)
     y = random.randint(up, down)
 
     platforms.append(Platform(width, height, x, y))
@@ -143,9 +142,12 @@ def generate_platforms(last_platform):
 
 
 def reset():
-    global player, platforms, trophies
+    global player, platforms, trophies, FPS, score, last_score
     player = Player()
     platforms = [Platform(800, 40, 0, SCREEN_HEIGHT - 40)]
+    FPS = 60
+    last_score = score.value
+    score = Score(icon="img/coin.png")
     trophies = []
 
 
@@ -153,7 +155,10 @@ player = Player()
 platforms = [Platform(800, 40, 0, SCREEN_HEIGHT - 40)]
 trophies = []
 clock = pygame.time.Clock()
-siuuu = Sound("snd/siuuu.mp3")
+coin = Sound("snd/coin.mp3")
+score = Score(icon="img/coin.png")
+last_score = 0
+FPS = 60
 
 while True:
     screen.fill((0, 0, 156))  # fundo azul claro
@@ -186,17 +191,26 @@ while True:
     for trophy in trophies:
         trophy.update(screen)
         if player.collides_with(trophy):
-            siuuu.play()
+            score.value += 1
+            coin.play()
             trophies.remove(trophy)
+            FPS += 5
 
     if player.y > SCREEN_HEIGHT + 100:
         reset()
 
+    if last_score > 0:
+        # Write on the topleft
+        font = pygame.font.Font(None, 36)
+        text = font.render(f"Último score: {last_score}", True, BLACK)
+        screen.blit(text, (20, 20))
+
+    score.draw(screen)
     # Atualizar a tela
     pygame.display.flip()
 
     # Controlar a taxa de quadros
-    clock.tick(60)
+    clock.tick(FPS)
 
     # Movimento contínuo para a direita (Ex: Geometry Dash)
     # Ao cair, voltar ao inicio
