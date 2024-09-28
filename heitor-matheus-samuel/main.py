@@ -118,9 +118,20 @@ class Fruit:
         self.vel = [self.vel[0], self.vel[1] + 1]  # Ajusta a velocidade após o corte
 
 
+def reset():
+    global life, lives, timer, score, frutas, start_time, game_over
+    life = Lifebar(start_value=3, max_value=3, icon=None)
+    lives = 3
+    timer = Timer(20)
+    score = Score(icon=None)
+    frutas = []
+    start_time = time.time()
+    game_over = False
+
+
 # Variáveis para o sistema de vidas
-lives = 3  # Quantidade inicial de vidas
 font = pygame.font.SysFont(None, 55)  # Fonte para exibir o Game Over
+lives = 3
 
 
 # Função para exibir texto na tela
@@ -150,8 +161,8 @@ timer = Timer(20)
 life = Lifebar(start_value=3, max_value=3, icon=None)
 score = Score(icon=None)
 
-ruler = pygame.image.load(f"img/regua.png").convert_alpha()
-ruler = pygame.transform.scale(ruler, (40, 40))
+ruler = pygame.image.load(f"img/ruler.png").convert_alpha()
+ruler = pygame.transform.scale(ruler, (80, 80))
 
 while running:
     screen.blit(background, (0, 0))  # Desenha a imagem de fundo (sala de aula)
@@ -159,28 +170,15 @@ while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
+        if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
+            reset()
 
     if lives <= 0 or timer.value <= 0:
         # Exibe tela de Game Over
+        score.draw(screen)
         elapsed_time = elapsed_time
         draw_text(
             "Game Over", font, RED, screen, SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 - 50
-        )
-        draw_text(
-            f"Thanks for playing",
-            font,
-            RED,
-            screen,
-            SCREEN_WIDTH // 2,
-            SCREEN_HEIGHT // 2 + 50,
-        )
-        draw_text(
-            f"Time played: {elapsed_time // 60}:{elapsed_time % 60:02d}",
-            font,
-            RED,
-            screen,
-            SCREEN_WIDTH // 2,
-            SCREEN_HEIGHT // 2 + 150,
         )
         pygame.display.flip()
         continue  # Pausa o jogo
@@ -208,22 +206,11 @@ while running:
     for fruta in frutas:
         fruta.update(screen)
 
-    # Exibe o número de vidas e o tempo de jogo na tela
-    draw_text(f"Vidas: {lives}", font, RED, screen, 100, 50)
-    draw_text(
-        f"Time: {elapsed_time // 60}:{elapsed_time % 60:02d}",
-        font,
-        RED,
-        screen,
-        SCREEN_WIDTH - 100,
-        50,
-    )
-
     # Get mouse position and add to deque
     mouse_positions.append(pygame.mouse.get_pos())
 
-    x = mouse_positions[-1][0] - 20
-    y = mouse_positions[-1][1] - 20
+    x = mouse_positions[-1][0] - 40
+    y = mouse_positions[-1][1] - 40
     screen.blit(ruler, (x, y))
 
     # Draw mouse trail
@@ -239,9 +226,8 @@ while running:
         if distance > min_speed_for_slash:
             # Detect slashing motion based on speed
             pygame.draw.circle(
-                screen, (255, 0, 0), mouse_positions[-1], 20
+                screen, (255, 0, 0), mouse_positions[-1], 5
             )  # Visual feedback for slash
-            print("Slashing motion detected!")
 
             # Go through all fruits and check if they were slashed
             for fruta in frutas:
@@ -264,17 +250,6 @@ while running:
                         score.value += 1
 
                     fruta.cut()  # Corta a fruta
-
-    # Exibe o número de vidas na tela
-    draw_text(f"Vidas: {lives}", font, RED, screen, 100, 50)
-    draw_text(
-        f"Time: {elapsed_time // 60}:{elapsed_time % 60:02d}",
-        font,
-        RED,
-        screen,
-        SCREEN_WIDTH - 100,
-        50,
-    )
 
     timer.draw(screen)
     life.draw(screen)

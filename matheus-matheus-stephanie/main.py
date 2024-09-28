@@ -2,13 +2,15 @@
 import pygame
 import random
 from utils.base import Base, Sound
+from utils.score import Score
+from utils.life import Lifebar
 
 # Inicializa o Pygame
 pygame.init()
 
 # Configurações da tela
-SCREEN_WIDTH = 1366
-SCREEN_HEIGHT = 768
+SCREEN_WIDTH = 1244
+SCREEN_HEIGHT = 700
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 pygame.display.set_caption("Matheus^2 e Stephanie")
 
@@ -51,19 +53,37 @@ class Player(Base):
 
 class Obstacle(Base):
     frequency = 1500  # Novo obstáculo a cada 1.5 segundos
+    gravity = 0.25
+    speed = -5
 
     def __init__(self, y):
         self.size = [80, 80]  # (largura, altura) do obstáculo
-        self.pos = [SCREEN_WIDTH, y]  # (x, y) da posição do obstáculo
+        self.pos = [
+            SCREEN_WIDTH + random.randint(10, 300),
+            y,
+        ]  # (x, y) da posição do obstáculo
 
         # Carrega e redimensiona a imagem
         self.image = pygame.image.load("img/prova a+.jfif").convert_alpha()
         self.image = pygame.transform.scale(self.image, self.size)
 
-        self.vel = [-5, 0]
+        self.vel = [self.speed, -5]
+
+        self.offset_jump = random.randint(-2, 2)
+        if y / SCREEN_HEIGHT > 0.6:
+            self.offset_jump = random.randint(0, 2)
+        elif y / SCREEN_HEIGHT < 0.4:
+            self.offset_jump = random.randint(-2, 0)
+
+        self.offset_speed = random.randint(-2, 2)
 
     def move(self):
-        self.pos[0] += self.vel[0]
+        self.pos[0] += self.vel[0] + self.offset_speed
+        self.pos[1] += self.vel[1]
+        self.vel[1] += self.gravity
+
+        if self.vel[1] > 5 - self.offset_jump:
+            self.vel[1] = -5
 
     def update(self, display):
         self.move()  # processa o movimento
@@ -72,7 +92,7 @@ class Obstacle(Base):
 
 class Bullet(Base):
     def __init__(self, x, y):
-        self.size = [100, 100]  # (largura, altura) do tiro
+        self.size = [200, 20]  # (largura, altura) do tiro
         self.pos = [
             x - self.size[0] // 2,
             y - self.size[1] // 2,
@@ -91,20 +111,31 @@ class Bullet(Base):
         display.blit(self.image, self.pos)
 
 
+def reset():
+    global player, obstacles, bullets, score, lifebar, cooldown
+    player = Player()
+    obstacles = []
+    bullets = []
+    score.value = 0
+    life.value = 5
+    cooldown = 0
+
+
 player = Player()
-last_obstacle = pygame.time.get_ticks()
 obstacles: list[Obstacle] = []
 bullets: list[Bullet] = []
-clock = pygame.time.Clock()
-explosion = Sound("snd/verde.mp3")
+life = Lifebar(start_value=5, max_value=5, icon=None)
+score = Score(icon="img/prova a+.jfif")
 cooldown = 0
 
 bg = pygame.image.load("img/patioelite.jpg").convert_alpha()
-bg= pygame.transform.scale(bg, (SCREEN_WIDTH, SCREEN_HEIGHT))
-
+bg = pygame.transform.scale(bg, (SCREEN_WIDTH, SCREEN_HEIGHT))
+clock = pygame.time.Clock()
+explosion = Sound("snd/verde.mp3")
+oof = Sound("snd/oof.mp3")
 
 while True:
-    screen.blit(bg, (0,0))
+    screen.blit(bg, (0, 0))
     current_time = pygame.time.get_ticks()
 
     # Término do jogo
@@ -112,6 +143,11 @@ while True:
         if event.type == pygame.QUIT:
             pygame.quit()
             break
+        if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
+            reset()
+
+    if life.value <= 0:
+        obstacles = []
 
     # Tiro
     keys = pygame.key.get_pressed()
@@ -125,11 +161,13 @@ while True:
         bullet.update(screen)
     bullets = [bullet for bullet in bullets if bullet.y < SCREEN_HEIGHT]
 
-    # Gerar novos obstáculos
-    if current_time - last_obstacle > Obstacle.frequency:
-        obstacles.append(Obstacle(random.randint(0, SCREEN_HEIGHT - 60)))
-        last_obstacle = current_time
-        Obstacle.frequency# Aumenta a frequência de obstáculos
+    Obstacle.frequency += Obstacle.speed / -30
+    print(Obstacle.speed)
+    if life.value > 0 and random.randint(0, 1000) < Obstacle.frequency:
+        for i in range(int(-Obstacle.speed // 3)):
+            obstacles.append(Obstacle(random.randint(0, SCREEN_HEIGHT - 60)))
+        Obstacle.frequency = 0
+        Obstacle.speed -= 0.15
 
     # Atualizar posição dos obstáculos
     for obstacle in obstacles:
@@ -140,16 +178,23 @@ while True:
     for obstacle in obstacles:  # para cada obstáculo
         if player.collides_with(obstacle):  # se colidiu
             print("Colidiu com o Flappy Bird")
+            life.value -= 1
+            oof.play()
+            obstacles.remove(obstacle)
 
     # Verificar colisões tiro-bird
     for bullet in bullets:
         for obstacle in obstacles:
             if bullet.collides_with(obstacle):
                 print("Flappy destruído!")
+                score.value += 1
                 explosion.play()
                 obstacles.remove(obstacle)
                 bullets.remove(bullet)
                 break
+
+    score.draw(screen)
+    life.draw(screen)
 
     # Atualiza o jogador
     player.update(screen)

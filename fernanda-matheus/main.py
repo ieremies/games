@@ -53,8 +53,14 @@ class Player(Base):
 
 
 class Block(Base):
+    default_width = 60
+    default_height = 30
+
     def __init__(self, x, y, vida, powerup=False):
-        self.size = [40, 25]  # (largura, altura) do bloco
+        self.size = [
+            self.default_width,
+            self.default_height,
+        ]  # (largura, altura) do bloco
         self.pos = [x, y]  # (x, y) da posição do bloco
 
         # Carrega e redimensiona a imagem
@@ -69,11 +75,9 @@ class Block(Base):
         self.powerup = powerup
 
         if powerup:
-            self.glow = pygame.image.load("img/glow.png").convert_alpha()
-            self.glow = pygame.transform.scale(self.glow, self.size)
-            self.image1.blit(self.glow, (0, 0))
-            self.image2.blit(self.glow, (0, 0))
-            self.image3.blit(self.glow, (0, 0))
+            self.image1 = pygame.image.load("img/book4.png").convert_alpha()
+            self.image1 = pygame.transform.scale(self.image1, self.size)
+            self.vida = 1
 
     def update(self, display):
         if self.vida == 1:
@@ -147,14 +151,24 @@ class PowerUp(Base):
         display.blit(self.image, self.pos)
 
 
-balls = [Ball(300, 400)]
-player = Player(250, 550)
+def reset():
+    global balls, player, power_ups, blocks
+    balls = [Ball(300, 400)]
+    player = Player(250, 550)
+    power_ups = []
+    blocks = [
+        Block(x, y, random.randint(1, 3), random.random() < 0.15)
+        for x in range(0, SCREEN_WIDTH, Block.default_width)
+        for y in range(0, 200, Block.default_height)
+    ]
+
+
+balls = None
+player = None
 power_ups = []
-blocks = [
-    Block(x, y, random.randint(1, 3))
-    for x in range(0, SCREEN_WIDTH, 40)
-    for y in range(0, 200, 20)
-]
+blocks = []
+reset()
+
 clock = pygame.time.Clock()
 power_up_sound = Sound("snd/power_up.mp3")
 block_break_sound = Sound("snd/block_break.mp3")
@@ -187,6 +201,11 @@ while True:
     for ball in balls:
         ball.update(screen)
 
+        if ball.pos[1] > SCREEN_HEIGHT:
+            balls.remove(ball)
+            if len(balls) == 0:
+                reset()
+
         # Check collision with player
         if ball.collides_with(player):
             ball.vel[1] = -ball.vel[1]
@@ -207,7 +226,7 @@ while True:
             if c == "Vertical":
                 new_vel[0] = -ball.vel[0]
             if c == "Horizontal":
-                new_vel[1] = -ball.vel[1]
+                new_vel[1] = abs(ball.vel[1])
         ball.vel = new_vel
 
     pygame.display.flip()

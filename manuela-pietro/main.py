@@ -6,7 +6,10 @@ você aperta espaço e grita, destruindo as outras blusas.
 """
 import pygame
 import random
-from utils.base import Base, Sound
+from utils.base import Base
+from utils.sound import Sound
+from utils.score import Score
+from utils.clock import Timer
 
 # Inicializa o Pygame
 pygame.init()
@@ -30,7 +33,7 @@ class Player(Base):
     friction = 0.9
 
     def __init__(self, color):
-        self.size = [60, 60]  # (largura, altura) do jogador
+        self.size = [70, 70]  # (largura, altura) do jogador
         self.pos = [500.0, SCREEN_HEIGHT - self.tam]  # (x, y) da posição do jogador
 
         # Carrega e redimensiona a imagem
@@ -49,6 +52,7 @@ class Player(Base):
     @tam.setter
     def tam(self, value):
         self.size = [value, value]
+        self.image = pygame.image.load("img/player.png").convert_alpha()
         self.image = pygame.transform.scale(self.image, (self.tam, self.tam))
 
     def move(self):
@@ -89,21 +93,25 @@ class Obstacle(Base):
 
     def __init__(self, x, color):
         self.size = [50, 50]  # (largura, altura) do obstáculo
-        self.pos = [x, -self.size[1]]  # (x, y) da posição do obstáculo
+        self.pos = [
+            x,
+            -self.size[1] - random.randint(20, 200),
+        ]  # (x, y) da posição do obstáculo
 
         # Carrega e redimensiona a imagem
         if color == elite:
             self.image = pygame.image.load("img/elite.png")
             self.image = pygame.transform.scale(self.image, self.size)
-        if color == polie:    
+        if color == polie:
             self.image = pygame.image.load("img/poliedro.jpg")
             self.image = pygame.transform.scale(self.image, self.size)
         if color == oficina:
             self.image = pygame.image.load("img/oficina.jpg")
             self.image = pygame.transform.scale(self.image, self.size)
-        
+
         self.vel = [0, 5.0]
         self.color = color
+
     def move(self):
         self.pos[1] += self.vel[1]
         self.vel[1] += self.gravity
@@ -113,41 +121,53 @@ class Obstacle(Base):
         display.blit(self.image, self.pos)
 
 
+def reset():
+    global player, obstacles, timer, score
+    player = Player(player)
+    obstacles = []
+    score.value = 0
+    timer = Timer(40, text="Tempo para fecharem os portões")
+
+
 player = Player(player)
 obstacles = []
 clock = pygame.time.Clock()
+score = Score(icon=None, text="Nota")
+
 last_obstacle = pygame.time.get_ticks()
 BLUSAS = [elite, oficina, polie]
 image = pygame.image.load("img/enem.jpg").convert_alpha()
 image = pygame.transform.scale(image, (SCREEN_WIDTH, SCREEN_HEIGHT))
 
-while True:
-    print("do balaco baco")
-    screen.fill((135, 206, 235))  # fundo azul claro
-    screen.blit(image, (0,0))
-    current_time = pygame.time.get_ticks()
+grow = Sound("snd/grow.mp3")
+hit = Sound("snd/hit.mp3")
 
+timer = Timer(40, text="Fechando os portões em")
+
+
+while True:
+    screen.fill((135, 206, 235))  # fundo azul claro
+    screen.blit(image, (0, 0))
+    current_time = pygame.time.get_ticks()
 
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             pygame.quit()
             break
 
+        if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
+            reset()
+
     player.update(screen)
 
-    if current_time - last_obstacle > Obstacle.frequency:
-        Obstacle.frequency -= 10
-        obstacles.append(
-            Obstacle(random.randint(0, SCREEN_WIDTH - 60), random.choice(BLUSAS))
-        )
-        for i in range(3):
+    Obstacle.frequency += Obstacle.gravity * 5
+    if timer.value > 0 and random.randint(0, 1000) < Obstacle.frequency:
+        for i in range(random.randint(1, 4)):
             obstacles.append(
-            Obstacle(random.randint(0, SCREEN_WIDTH - 60), random.choice(BLUSAS))
-        )
-            Obstacle.frequency += 100
-
-        last_obstacle = current_time
-        Obstacle.frequency = random.randint(500, 1500)
+                Obstacle(random.randint(0, SCREEN_WIDTH - 60), random.choice(BLUSAS))
+            )
+        Obstacle.frequency = 0
+        Obstacle.gravity += 0.001
 
     for obstacle in obstacles:
         obstacle.update(screen)
@@ -157,11 +177,18 @@ while True:
         if player.collides_with(obstacle):
             obstacles.remove(obstacle)
             if player.color == obstacle.color:
-                player.tam += 5
-                player.y -= 5
+                player.tam += 10
+                player.y -= 10
+                grow.play()
+                score.value += 85
             else:
-                player.tam -= 5
-                player.y += 5
+                player.tam -= 10
+                player.y += 10
+                hit.play()
+                score.value -= 50
+
+    score.draw(screen)
+    timer.draw(screen)
 
     # Atualiza o jogador
     player.update(screen)
